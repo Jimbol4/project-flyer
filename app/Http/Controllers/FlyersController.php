@@ -6,9 +6,20 @@ use Illuminate\Http\Request;
 
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\FlyerRequest;
+use App\Flyer;
+use App\Photo;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class FlyersController extends Controller
 {
+    
+    public function __construct() {
+        $this->middleware('auth', ['except' => ['show']]);
+        
+        parent::__construct();
+    }
+    
     /**
      * Display a listing of the resource.
      *
@@ -26,6 +37,7 @@ class FlyersController extends Controller
      */
     public function create()
     {
+        //flash()->overlay('Hello World', 'This is the message.');
         return view('flyers.create');
     }
 
@@ -35,9 +47,17 @@ class FlyersController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(FlyerRequest $request)
     {
-        //
+//        Flyer::create($request->all());
+        
+       $flyer = $this->user->publish(
+                new Flyer($request->all())
+        );
+        
+        flash('Success!', 'Your flyer has been created.');
+        
+        return redirect(flyer_path($flyer));
     }
 
     /**
@@ -46,9 +66,11 @@ class FlyersController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($zip, $street)
     {
-        //
+        $flyer = Flyer::locatedAt($zip, $street);
+        
+        return view('flyers.show', compact('flyer'));
     }
 
     /**
@@ -84,4 +106,5 @@ class FlyersController extends Controller
     {
         //
     }
+    
 }

@@ -9,6 +9,7 @@ use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+use App\Flyer;
 
 class User extends Model implements AuthenticatableContract,
                                     AuthorizableContract,
@@ -36,4 +37,16 @@ class User extends Model implements AuthenticatableContract,
      * @var array
      */
     protected $hidden = ['password', 'remember_token'];
+    
+    public function owns($relation) {
+       return $relation->user_id == $this->id; 
+    }
+    
+    public function flyers() {
+        return $this->hasMany('App\Flyer');
+    }
+    
+    public function publish(Flyer $flyer) {
+       return $this->flyers()->save($flyer);
+    }
 }
